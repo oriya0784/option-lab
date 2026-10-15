@@ -1,5 +1,7 @@
 # 星辰期權練習室 · Option Lab v0.5.0
 
+**線上遊玩：[星辰期權練習室](https://oriya0784.github.io/option-lab/)**
+
 虛構歐式指數期權交易遊戲，無需帳號、API key、套件安裝或真正資金。以 `python -m http.server 8765 --bind 127.0.0.1 --directory dist` 啟動，再開啟 http://127.0.0.1:8765/。
 
 ## 已實作
@@ -42,7 +44,7 @@ NOVA 是虛構指數，起始 1,000，每點每口 50。使用簡化 Black–Sch
 
 儲存庫：https://github.com/oriya0784/option-lab
 
-目前網站：https://option-lab-tw.shirakabaoriya.chatgpt.site/
+GitHub Pages 遊戲網址：https://oriya0784.github.io/option-lab/
 
 此份程式對應 v0.5.0。直接使用 `dist/` 內的 HTML、CSS 和 JavaScript，不需要安裝前端套件，也沒有建置步驟。
 
@@ -78,3 +80,11 @@ node tests/hold-repeat.test.cjs
 - `tests/`：不需要瀏覽器的模型與互動邏輯測試。
 
 儲存庫不包含原託管平台的專案設定、憑證、瀏覽器存檔或工作紀錄。GitHub 上的程式不會自動取得既有網站中的本機進度。
+
+## GitHub Pages 發佈
+
+網站由此儲存庫的 `main` 分支、`/(root)` 發佈。根目錄的 `index.html` 直接載入遊戲，`.nojekyll` 讓 GitHub 原樣提供靜態檔案。
+
+修改 `dist/index.html` 後，執行 `npm run build:pages`（或 `node scripts/build-pages.cjs`），將更新後的根目錄入口一併提交。CSS 和 JavaScript 保持在 `dist/`，沒有複製第二套程式。更新 `main` 後，GitHub Pages 會重新部署。
+
+手機、平板與電腦皆可直接開啟遊戲網址，不需在自己的電腦啟動伺服器。進度保存於各裝置的瀏覽器；不同裝置不會自動同步，需匯出與匯入存檔。
