@@ -19,9 +19,11 @@
     intro('#payoff-chart','方向對，仍可能沒賺錢','到期損益除了內含價值，還要扣權利金與費用。買 Call 不是只要上漲就一定賺；要越過損益兩平點。這張圖是假設持有至到期，提前平倉的結果還受到隱含波動率（IV）、剩餘時間與成交價差的影響。'),
     intro('#risk-panel','這四個指標告訴你，期權價格會受到什麼影響','Delta 看指數價格變動的影響；Gamma 看 Delta 會怎麼變；Theta 看時間流逝的影響；Vega 看隱含波動率（IV）改變的影響。IV 是期權報價反映的預期波動程度。這些是小幅變動的模型估計，不能直接套用到大幅跳動的行情。'),
     quiz('#risk-panel','指數價格不變，期權的價值也會變嗎？','假設買入 Call 時，履約價等於目前的指數價格。之後指數價格、IV 等其他條件都不變，只是越來越接近到期日。這筆 Call 的時間價值通常會怎麼變？',['隨時間增加','隨時間減少','保證完全不變'],1,'時間價值通常會隨著到期日接近而減少。所以買入期權時，除了預期價格會往哪個方向走，也要考慮變動幅度和需要多少時間。'),
+    intro('#risk-panel','時間價值消失，不代表整張期權一定歸零','權利金包含內含價值與時間價值。到期時消失的是時間價值；價內期權仍有履約差額。標的價格或 IV 改變時，也可能抵過時間流失，使總價格上漲。Theta 只是目前、其他條件不變下的每日估計，不是固定扣款。'),
+    quiz('#risk-panel','到期時，價內 Call 一定變成零嗎？','假設 Call 履約價 1000，到期指數為 1050。這時時間價值是零，這張 Call 的每口內含價值是多少？',['0，因為時間已經用完','50 點，再乘合約乘數；獲利仍要扣原成本','只看 Theta 就能決定'],1,'時間價值歸零，但 Call 仍有 1050−1000＝50 點內含價值。這裡每點每口 50 虛擬元，因此結算收入為 2500 元；還要扣原本支付的權利金與開倉費，才是損益。'),
     intro('#position-panel','開反方向單，並不是平倉','持倉區的「賣出平倉」處理買方，「買回平倉」處理賣方。可調口數部分平倉，或按「委託」設限價／停損。交易區直接選反方向開倉，會建立新的部位。'),
     intro('#time-controls','讓市場動起來','每個模擬交易日有 6 輪撮合。推進一輪適合看掛單；推進多日會依序檢查成交、到期與保證金。不是直接跳到最後，途中可能先被強制平倉。'),
-    intro('#strategy-mode','組合策略是把多張期權一起看','除了單一合約，這裡有六種組合。四種垂直價差用一買一賣限制到期風險；跨式期待大幅移動；鐵兀鷹期待區間盤整。教學選單的 03 有六堂獨立實作，帶你看每一腿。'),
+    intro('#strategy-mode','組合策略是把多張期權一起看','除了單一合約，這裡有七種組合。四種垂直價差用一買一賣限制到期風險；跨式期待大幅移動；鐵兀鷹期待區間盤整；蝴蝶期待到期接近中心價位。教學選單的 03 有七堂獨立實作，帶你看每一腿。'),
     intro('#stress-panel','情境試算可以試價格、IV 和時間','展開這一區，可以改三個假設，看現有持倉的理論價值變化。它不會送出交易，也不會推進行情；不含成交價差、後續費用與途中強制平倉，不能當作預測或最大損失。'),
     intro('.chart-switch','切換指數與帳戶權益走勢','指數上漲，不代表帳戶一定獲利。切換帳戶權益，可以看持倉價值與交易成本如何影響帳戶。04 會帶你實際比較價格、IV 與時間的影響。'),
     intro('#settings','設定、保存與新回合','這個按鈕可開關動畫、匯出或匯入存檔，以及選新回合情境。06 會直接帶你看設定畫面。存檔保存在目前瀏覽器，不會跨裝置自動同步。'),
@@ -65,13 +67,14 @@
       ...(id==='straddle'?[
         intro('#strategy-legs','跨式不需要履約價距離','Call 和 Put 都用同一個履約價，所以距離欄會隱藏。兩腿都買入，沒有賣腿幫你分攤成本。')
       ]:[
-        op('#strategy-width','把每段距離設為 40','直接輸入 40。'+(id==='condor'?'中心為 K 時，賣 Put 在 K−40、賣 Call 在 K＋40；保護腿在 K−80、K＋80。':'兩腿履約價相差 40 點。距離越寬，成本與風險形狀也可能改變。'),'strategy-width',d=>Number(d.value)===40),
+        op('#strategy-width','把每段距離設為 40','直接輸入 40。'+(id==='condor'?'中心為 K 時，賣 Put 在 K−40、賣 Call 在 K＋40；保護腿在 K−80、K＋80。':id==='butterfly'?'中心為 K 時，買 K−40 Call 一口、賣 K Call 兩口、買 K＋40 Call 一口。每翼距離都是 40。':'兩腿履約價相差 40 點。距離越寬，成本與風險形狀也可能改變。'),'strategy-width',d=>Number(d.value)===40),
         intro('#strategy-legs','看清楚每一腿做什麼',s.structure+' '+(id==='condor'?'本版兩翼等寬；一次只會在一側產生到期翼部損失。':'買腿與賣腿要一起算，不能只看到賣腿收到的權利金。'))
       ]),
-      op('#term-30','選同一個 30 日到期','點「30 日」。同到期、同口數以及保護腿仍存在，是這個策略的風險條件。','term',d=>d.days===30),
+      op('#term-30','選同一個 30 日到期',id==='butterfly'?'點「30 日」。同到期、1：2：1 口數比例，以及兩側保護部位仍存在，是這個策略的風險條件。':'點「30 日」。同到期、同口數以及保護腿仍存在，是這個策略的風險條件。','term',d=>d.days===30),
       intro('#ticket .ticket-details','用這次報價檢查收付與最大損益','看淨權利金是收或付，再看費用、兩平點與最大損益。通常收權利金的策略，距離很窄時也可能被 Bid／Ask 價差吃掉，變成淨支出。數字以這次實際報價為準。'),
       intro('#payoff-chart','這張圖是假設保留所有腿到期',s.risk+' 圖與最大損益已計開倉費，未計提前平倉費。'+s.time),
       quiz('#strategy-legs',s.question,s.example,s.answers,s.correct,s.answer,'依題目先計算每腿的到期內含價值，再加上淨收款或扣掉淨支出。保護腿仍須保留。'),
+      ...(id==='butterfly'?[intro('#payoff-chart','蝴蝶與鐵兀鷹，有什麼不同？','蝴蝶的到期獲利在中心形成尖頂，偏離中心就減少；鐵兀鷹則在兩張賣腿之間形成一段平頂。兩者都可能虧損，也都需要保留保護部位。')]:[]),
       op('#buy','整組送出策略','點送出。此模擬器採整組市價 IOC，受最薄一腿深度限制；各腿成交組數一致，餘量取消。它沒有模擬多腿限價委託。','strategy',d=>d.result.filled===1),
       intro('#position-panel','現在持有整組策略','每腿分別列出報價、成本和到期日。拆掉保護腿會改變風險；原本的到期損失上限可能不再成立，資金不足時也會拒絕拆腿平倉。',{enter:()=>L.selectTab('holdings')}),
       op('#holdings-view .close-group','把整組一起平倉','點「整組平倉」。這裡保持各腿相同平倉組數；仍受本輪報價深度限制，沒有保證能一次全數成交。','close-group',d=>d.result.qty===1),
@@ -159,7 +162,7 @@
     document.querySelectorAll('[data-course]').forEach(b=>{const name=b.dataset.course,completed=L.lessonDone(name);b.classList.toggle('lesson-done',completed);b.querySelector('b').textContent=completed?'已完成 · 再練一次 →':name==='intro'?'開始導覽 →':'進入練習 →';});
   }
   function courseButton(name,heading,title,copy){const b=document.createElement('button');b.dataset.course=name;const span=document.createElement('span'),strong=document.createElement('strong'),small=document.createElement('small'),status=document.createElement('b');span.textContent=heading;strong.textContent=title;small.textContent=copy;b.append(span,strong,small,status);return b;}
-  for(const [id,s] of Object.entries(S))$('strategy-courses').append(courseButton('strategy-'+id,s.outlook,s.name,id==='straddle'?'2 腿 · 同履約價 · 大幅移動':id==='condor'?'4 腿 · 兩側保護 · 區間盤整':'2 腿 · 同到期價差 · 有限到期風險'));
+  for(const [id,s] of Object.entries(S))$('strategy-courses').append(courseButton('strategy-'+id,s.outlook,s.name,id==='straddle'?'2 腿 · 同履約價 · 大幅移動':id==='condor'?'4 腿 · 兩側保護 · 區間盤整':id==='butterfly'?'3 個履約價 · 1：2：1 · 到期接近中心':'2 腿 · 同到期價差 · 有限到期風險'));
   for(const [id,title,copy] of [['risk','比較價格、IV 與時間','Greeks、三組試算、保證金與權益圖'],['orders','管理部位到到期','部分平倉、停損、GTC、撤單與現金結算'],['storage','設定與保留進度','動畫、備份、匯入與新回合']])$('more-courses').append(courseButton(id,titles[id],title,copy));
   $('tour-exit').addEventListener('click',()=>finish());$('tour-next').addEventListener('click',next);
   for(const id of ['tutorial-open','welcome-tutorial'])$(id).addEventListener('click',()=>{menu();$('tutorial-dialog').showModal();});

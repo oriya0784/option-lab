@@ -1,10 +1,10 @@
 {
   "name": "option-lab",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "private": true,
   "description": "星辰期權練習室：虛構歐式指數期權交易與互動教學",
   "scripts": {
-    "test": "node tests/engine.test.cjs && node tests/hold-repeat.test.cjs",
+    "test": "node tests/engine.test.cjs && node tests/hold-repeat.test.cjs && node tests/butterfly.test.cjs",
     "build:pages": "node scripts/build-pages.cjs"
   },
   "engines": {
